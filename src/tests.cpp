@@ -7,7 +7,12 @@ int my_strlen(char *str) {
      */
 
     // IMPLEMENT YOUR CODE HERE
-    return 0;
+    int length = 0;
+    while (*str != '\0'){
+        length++;
+        str++;
+    }
+    return length;
 }
 
 
@@ -19,6 +24,15 @@ void my_strcat(char *str_1, char *str_2) {
      */
 
     // IMPLEMENT YOUR CODE HERE
+    while(*str_1 != '\0'){
+        str_1++;
+    }
+    while(*str_2 != '\0'){
+        *str_1 = *str_2;
+        str_1++;
+        str_2++;
+    }
+    *str_1 = '\0';
 }
 
 
@@ -31,7 +45,20 @@ char* my_strstr(char *s, char *p) {
      */
 
     // IMPLEMENT YOUR CODE HERE
-    return 0;
+    int p_length = 0;
+    while (p[p_length] != '\0'){
+        p_length++;
+    }
+    for(int i = 0;s[i] != '\0';i++){
+        int j = 0;
+        while(s[i + j] == p[j] && j < p_length){
+            j++;
+        }
+        if(j == p_length){
+            return &s[i];
+        }
+    }
+    return nullptr;
 }
 
 
@@ -96,7 +123,13 @@ void rgb2gray(float *in, float *out, int h, int w) {
      */
 
     // IMPLEMENT YOUR CODE HERE
-    // ...
+    for (int i = 0; i < h; ++i) {
+        for (int j = 0; j < w; ++j) {
+            int index = (i * w + j) * 3;
+            float gray = 0.1140 * in[index] + 0.5870 * in[index + 1] + 0.2989 * in[index + 2];
+            out[i * w + j] = gray;
+        }
+    }
 }
 
 // 练习5，实现图像处理算法 resize：缩小或放大图像
@@ -198,7 +231,32 @@ void resize(float *in, float *out, int h, int w, int c, float scale) {
 
     int new_h = h * scale, new_w = w * scale;
     // IMPLEMENT YOUR CODE HERE
-
+ for (int i = 0; i < new_h; ++i) {
+        for (int j = 0; j < new_w; ++j) {
+            float x0 = j / scale;
+            float y0 = i / scale;
+            int x1 = static_cast<int>(x0);
+            int y1 = static_cast<int>(y0);
+            x1 = (x1 < 0) ? 0 : (x1 >= w ? w - 1 : x1);
+            y1 = (y1 < 0) ? 0 : (y1 >= h ? h - 1 : y1);
+            int x2 = (x1 + 1) < w ? (x1 + 1) : x1;
+            int y2 = (y1 + 1) < h ? (y1 + 1) : y1;
+            for (int k = 0; k < c; ++k) {
+                float q11 = in[(y1 * w + x1) * c + k];
+                float q21 = in[(y1 * w + x2) * c + k];
+                float q12 = in[(y2 * w + x1) * c + k];
+                float q22 = in[(y2 * w + x2) * c + k];
+                float dx = x0 - x1;
+                float dy = y0 - y1;
+                float interpolatedValue = (1 - dx) * (1 - dy) * q11 +
+                                          dx * (1 - dy) * q21 +
+                              
+                                          (1 - dx) * dy * q12 +
+                                          dx * dy * q22;
+                out[(i * new_w + j) * c + k] = interpolatedValue;
+            }
+        }
+    }
 }
 
 
@@ -221,4 +279,27 @@ void hist_eq(float *in, int h, int w) {
      */
 
     // IMPLEMENT YOUR CODE HERE
+    int hist[256] = {0};
+    for (int i = 0; i < h; ++i) {
+        for (int j = 0; j < w; ++j) {
+            int pixel_value = static_cast<int>(in[i * w + j]);
+            hist[pixel_value]++;
+        }
+    }
+    int cum_hist[256] = {0};
+    int total_pixels = h * w;
+    cum_hist[0] = hist[0];
+    for (int i = 1; i < 256; ++i) {
+        cum_hist[i] = cum_hist[i - 1] + hist[i];
+    }
+    for (int i = 0; i < 256; ++i) {
+        cum_hist[i] = (cum_hist[i] * 255 + total_pixels / 2) / total_pixels;
+    }
+    for (int i = 0; i < h; ++i) {
+        for (int j = 0; j < w; ++j) {
+            int pixel_value = static_cast<int>(in[i * w + j]);
+            int new_pixel_value = cum_hist[pixel_value];
+            in[i * w + j] = static_cast<float>(new_pixel_value);
+        }
+    }
 }
