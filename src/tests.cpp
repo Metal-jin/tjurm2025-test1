@@ -123,11 +123,15 @@ void rgb2gray(float *in, float *out, int h, int w) {
      */
 
     // IMPLEMENT YOUR CODE HERE
-    for (int i = 0; i < h; ++i) {
-        for (int j = 0; j < w; ++j) {
-            int index = (i * w + j) * 3;
-            float gray = 0.1140 * in[index] + 0.5870 * in[index + 1] + 0.2989 * in[index + 2];
-            out[i * w + j] = gray;
+    for (int i = 1; i <= h; i++) {
+        for (int j = 1; j <= w; j++) {
+            int index = i * w + j;
+            int rgbIndex = index * 3;
+            float r = in[rgbIndex];
+            float g = in[rgbIndex + 1];
+            float b = in[rgbIndex + 2];        
+            float grayValue = 0.2989 * r + 0.5870 * g + 0.1140 * b;
+            out[index] = grayValue;
         }
     }
 }
